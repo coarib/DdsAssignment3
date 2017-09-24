@@ -7,13 +7,14 @@
 library(plyr)
 library(gdata)
 #setwd("C:/MSDS 6306-FALL2016/404/Live session 06")
-setwd("G://onlineSchool//SMU//MSDS6306//lectureNotes//week5")
+# setwd("G://onlineSchool//SMU//MSDS6306//lectureNotes//week5")
 ## You need a perl interpreter to do this on Windows.
 ## It's automatic in Mac
-#bk <- read.xls("rollingsales_brooklyn.xls",pattern="BOROUGH")
+
+bk <- read.xls(".\\Data\\rollingsales_brooklyn.xls",pattern="BOROUGH",perl = "C:\\Strawberry\\perl\\bin\\perl.exe")
 
 # So, save the file as a csv and use read.csv instead
-bk <- read.csv("rollingsales_brooklyn.csv",skip=4,header=TRUE)
+#bk <- read.csv(".\\Data\\rollingsales_brooklyn.csv",skip=4,header=TRUE)
 
 ## Check the data
 head(bk)
