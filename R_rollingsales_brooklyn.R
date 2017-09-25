@@ -10,16 +10,11 @@ library(gdata)
 # setwd("G://onlineSchool//SMU//MSDS6306//lectureNotes//week5")
 ## You need a perl interpreter to do this on Windows.
 ## It's automatic in Mac
-
-bk <- read.xls(".\\Data\\rollingsales_brooklyn.xls",pattern="BOROUGH",perl = "C:\\Strawberry\\perl\\bin\\perl.exe")
+#bk <- read.xls(".\\Data\\rollingsales_brooklyn.xls",pattern="BOROUGH",perl = "C:\\Strawberry\\perl\\bin\\perl.exe")
 
 # So, save the file as a csv and use read.csv instead
-#bk <- read.csv(".\\Data\\rollingsales_brooklyn.csv",skip=4,header=TRUE)
+bk <- read.csv(".\\Data\\rollingsales_brooklyn.csv",skip=4,header=TRUE)
 
-## Check the data
-head(bk)
-summary(bk)
-str(bk) # Very handy function!
 
 ## clean/format the data with regular expressions
 ## More on these later. For now, know that the
@@ -32,22 +27,38 @@ count(is.na(bk$SALE.PRICE.N))
 
 names(bk) <- tolower(names(bk)) # make all variable names lower case
 
-## TODO: Get rid of leading digits bk$gross.square.feet as above bk$SALE.PRICE
-bk$gross.sqft <- as.numeric()
+## clean/format the data with regular expressions
+bk$gross.sqft <- as.numeric(gsub("[^[:digit:]]","", bk$gross.square.feet))
 
-# TODO: Get rid of leading digits of bk$land.sqft as above bk$SALE.PRICE
-bk$land.sqft <- 
-  
-  bk$year.built <- as.numeric(as.character(bk$year.built))
+## clean/format the data with regular expressions
+#bk$land.square.feet <- as.numeric(gsub("[^[:digit:]]","", bk$land.square.feet))
 
-## do a bit of exploration to make sure there's not anything
-## weird going on with sale prices
-attach(bk)
-hist(sale.price.n) 
-detach(bk)
+bk$year.built <- as.numeric(as.character(bk$year.built))
+
+
 
 ## keep only the actual sales
 bk.sale <- bk[bk$sale.price.n!=0,]
+
+writeLines("\nsummary(bk):\n")
+print(summary(bk))
+## do a bit of exploration to make sure there's not anything
+## weird going on with sale prices
+attach(bk)
+hist(sale.price.n,breaks=seq(0,340000000,1000000)) 
+detach(bk)
+
+
+## Check the data 
+writeLines("\nhead(bk.sale)\n")
+print(head(bk.sale))
+
+writeLines("\nsummary(bk.sale)\n")
+print(summary(bk.sale))
+
+writeLines("\nstr(bk.sale)\n")
+str(bk.sale) # Very handy function!
+
 plot(bk.sale$gross.sqft,bk.sale$sale.price.n)
 plot(log10(bk.sale$gross.sqft),log10(bk.sale$sale.price.n))
 
@@ -56,16 +67,24 @@ bk.homes <- bk.sale[which(grepl("FAMILY",bk.sale$building.class.category)),]
 dim(bk.homes)
 
 
-# TODO: complete plot() with log10 of bk.homes$gross.sqft,bk.homes$sale.price.n
+# complete plot() with log10 of bk.homes$gross.sqft,bk.homes$sale.price.n
 #   as above "bk.sale"
-plot()
-summary(bk.homes[which(bk.homes$sale.price.n<100000),])
+plot(log10(bk.homes$gross.sqft),log10(bk.homes$sale.price.n))
 
+writeLines("\nsummary(bk.homes) with sale price < 100000\n")
+print(summary(bk.homes[which(bk.homes$sale.price.n<100000),]))
 
 ## remove outliers that seem like they weren't actual sales
 bk.homes$outliers <- (log10(bk.homes$sale.price.n) <=5) + 0
 
-# TODO: find out homes that meets bk.homes$outliers==0
-bk.homes <- bk.homes[which(),]
+# find out homes that meets bk.homes$outliers==0
+bk.homes <- bk.homes[which(bk.homes$outliers==0),]
+
+writeLines("\nsummary(bk.homes) after outliers were removed:\n")
+print(summary(bk.homes))
 
 plot(log10(bk.homes$gross.sqft),log10(bk.homes$sale.price.n))
+
+attach(bk.homes)
+hist(sale.price.n,breaks = 200) 
+detach(bk.homes)
